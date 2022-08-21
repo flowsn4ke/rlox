@@ -81,7 +81,9 @@ impl Scanner {
                 '=' => tokens.push(self.scan_symbol()),
                 '<' => tokens.push(self.scan_symbol()),
                 '>' => tokens.push(self.scan_symbol()),
-                '"' => tokens.push(self.scan_symbol()),
+                '"' => {
+                    tokens.push(self.scan_string());
+                }
                 ' ' | '\r' | '\t' => self.advance(),
                 '\n' => {
                     self.line += 1;
@@ -148,7 +150,7 @@ impl Scanner {
 
         TokenTypes::Number(Token::new(TokenType::Number, lexeme, number, self.line))
     }
-    fn scan_string(&mut self) -> Token<String> {
+    fn scan_string(&mut self) -> TokenTypes {
         let start = self.current;
 
         while self.get_current_char() != '"' {
@@ -159,7 +161,12 @@ impl Scanner {
         let lexeme_chars = &self.source[start..self.current];
         let lexeme = String::from_iter(lexeme_chars);
 
-        Token::new(TokenType::String, lexeme.clone(), lexeme.clone(), self.line)
+        TokenTypes::String(Token::new(
+            TokenType::String,
+            lexeme.clone(),
+            lexeme.clone(),
+            self.line,
+        ))
     }
 }
 
