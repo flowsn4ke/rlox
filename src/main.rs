@@ -17,7 +17,7 @@ fn main() {
 }
 
 fn run(source: String) {
-    let scanner = Scanner::from(source);
+    let mut scanner = Scanner::from(source);
     let tokens = scanner.scan_tokens();
 }
 
@@ -59,41 +59,38 @@ impl Scanner {
             line: 1,
         }
     }
-    fn scan_tokens(&self) -> Vec<Token> {
-        println!("test");
-
+    fn scan_tokens(&mut self) -> Vec<Token> {
         let tokens: Vec<Token> = Vec::new();
 
+        let mut iter = self.source.chars().peekable();
+
+        while let Some(chr) = iter.next() {
+            println!("{} at position {}", chr, self.current);
+            self.current += 1;
+
+            // match chr {
+            //     '(' => tokens.push(Token {
+            //         typ: TokenType::LEFT_PAREN,
+            //         line: self.line,
+            //         lexeme: "lexeme",
+            //         literal: "literal",
+            //     }),
+            //     _ => {}
+            // };
+
+            match iter.peek() {
+                Some(x) => {
+                    println!(" Next is {:?}", *x)
+                }
+                _ => {
+                    break;
+                }
+            };
+        }
+
+        println!("Tokens: {:?}", tokens);
+
         tokens
-        // let mut iter = self.source.chars().peekable();
-
-        // while let Some(chr) = iter.next() {
-        //     println!("{} at position {}", chr, current_idx);
-        //     current_idx += 1;
-
-        //     match chr {
-        //         '(' => tokens.push(Token {
-        //             typ: TokenType::LEFT_PAREN,
-        //             line: current_line,
-        //             lexeme: "lexeme",
-        //             literal: "literal",
-        //         }),
-        //         _ => {}
-        //     };
-
-        //     match iter.peek() {
-        //         Some(x) => {
-        //             println!(" Next is {:?}", *x)
-        //         }
-        //         _ => {
-        //             break;
-        //         }
-        //     };
-        // }
-
-        // println!("Tokens: {:?}", tokens);
-
-        // tokens
     }
 }
 
