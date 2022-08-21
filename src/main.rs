@@ -44,67 +44,142 @@ fn run_prompt() {
 }
 
 struct Scanner {
-    source: String,
-    start: u32,
-    current: u32,
+    source: Vec<char>,
+    current: usize,
     line: u32,
 }
 
 impl Scanner {
     fn from(source: String) -> Scanner {
         Scanner {
-            source,
-            start: 0,
+            source: source.chars().collect(),
             current: 0,
             line: 1,
         }
     }
-    fn scan_tokens(&mut self) -> Vec<Token> {
-        let tokens: Vec<Token> = Vec::new();
+    fn scan_tokens(&mut self) -> Vec<TokenTypes> {
+        let mut tokens: Vec<TokenTypes> = Vec::new();
 
-        let mut iter = self.source.chars().peekable();
+        while self.current < self.source.len() {
+            let c = self.get_current_char();
 
-        while let Some(chr) = iter.next() {
-            println!("{} at position {}", chr, self.current);
-            self.current += 1;
-
-            // match chr {
-            //     '(' => tokens.push(Token {
-            //         typ: TokenType::LEFT_PAREN,
-            //         line: self.line,
-            //         lexeme: "lexeme",
-            //         literal: "literal",
-            //     }),
-            //     _ => {}
-            // };
-
-            match iter.peek() {
-                Some(x) => {
-                    println!(" Next is {:?}", *x)
+            match c {
+                '(' => tokens.push(self.scan_symbol()),
+                ')' => tokens.push(self.scan_symbol()),
+                '{' => tokens.push(self.scan_symbol()),
+                '}' => tokens.push(self.scan_symbol()),
+                '[' => tokens.push(self.scan_symbol()),
+                ']' => tokens.push(self.scan_symbol()),
+                ',' => tokens.push(self.scan_symbol()),
+                '.' => tokens.push(self.scan_symbol()),
+                '-' => tokens.push(self.scan_symbol()),
+                '+' => tokens.push(self.scan_symbol()),
+                ';' => tokens.push(self.scan_symbol()),
+                '*' => tokens.push(self.scan_symbol()),
+                '/' => tokens.push(self.scan_symbol()),
+                '!' => tokens.push(self.scan_symbol()),
+                '=' => tokens.push(self.scan_symbol()),
+                '<' => tokens.push(self.scan_symbol()),
+                '>' => tokens.push(self.scan_symbol()),
+                '"' => tokens.push(self.scan_symbol()),
+                ' ' | '\r' | '\t' => self.advance(),
+                '\n' => {
+                    self.line += 1;
+                    self.advance();
                 }
                 _ => {
-                    break;
+                    if c.is_digit(10) {
+                        tokens.push(self.scan_number());
+                    } else if self.is_alpha(c) {
+                        tokens.push(self.scan_identifier());
+                    } else {
+                        panic!("Unexpected character.");
+                    }
                 }
             };
         }
 
-        println!("Tokens: {:?}", tokens);
-
         tokens
+    }
+    fn get_current_char(&self) -> char {
+        self.source[self.current]
+    }
+    fn advance(&mut self) {
+        self.current += 1;
+    }
+    fn peek(&self) -> char {
+        self.source[self.current + 1]
+    }
+    fn is_alpha(&self, c: char) -> bool {
+        c.is_alphabetic() || c == '_'
+    }
+    fn scan_symbol(&mut self) -> TokenTypes {
+        let lexeme_char = &self.source[self.current];
+        let lexeme = lexeme_char.to_string();
+        let typ = get_symbol_type(&lexeme);
+
+        self.advance();
+
+        TokenTypes::Symbol(Token::new(typ, lexeme.clone(), lexeme.clone(), self.line))
+    }
+    fn scan_identifier(&mut self) -> TokenTypes {
+        let start = self.current;
+
+        while self.get_current_char().is_alphanumeric() {
+            self.advance();
+        }
+
+        let lexeme_chars = &self.source[start..self.current];
+        let lexeme = String::from_iter(lexeme_chars);
+        let typ = get_identifier_type(&lexeme);
+
+        TokenTypes::String(Token::new(typ, lexeme.clone(), lexeme.clone(), self.line))
+    }
+    fn scan_number(&mut self) -> TokenTypes {
+        let start = self.current;
+
+        while self.get_current_char().is_digit(10) {
+            self.advance();
+        }
+
+        let lexeme_chars = &self.source[start..self.current];
+        let lexeme = String::from_iter(lexeme_chars);
+        let number = lexeme.parse::<i64>().unwrap();
+
+        TokenTypes::Number(Token::new(TokenType::Number, lexeme, number, self.line))
+    }
+    fn scan_string(&mut self) -> Token<String> {
+        let start = self.current;
+
+        while self.get_current_char() != '"' {
+            self.advance();
+        }
+        self.advance(); // get rid of the trailing "
+
+        let lexeme_chars = &self.source[start..self.current];
+        let lexeme = String::from_iter(lexeme_chars);
+
+        Token::new(TokenType::String, lexeme.clone(), lexeme.clone(), self.line)
     }
 }
 
 #[derive(Debug)]
-struct Token<'a> {
+struct Token<T: fmt::Display + fmt::Debug> {
     typ: TokenType,
-    lexeme: &'a str,
-    literal: &'a str,
+    lexeme: String,
+    literal: T,
     line: u32,
 }
 
-impl<'a> Token<'a> {
-    // This is an associated function
-    fn new(typ: TokenType, lexeme: &'a str, literal: &'a str, line: u32) -> Token<'a> {
+enum TokenTypes {
+    Symbol(Token<String>),
+    Identifier(Token<String>),
+    Number(Token<i64>),
+    String(Token<String>),
+}
+
+impl<T: fmt::Display + fmt::Debug> Token<T> {
+    fn new(typ: TokenType, lexeme: String, literal: T, line: u32) -> Token<T> {
         Token {
             typ,
             lexeme,
@@ -112,33 +187,49 @@ impl<'a> Token<'a> {
             line,
         }
     }
-    // This is a method
-    fn to_string(&self) -> String {
-        format!("{} {} {}", self.typ, self.lexeme, self.literal)
+}
+
+fn get_symbol_type(lexeme: &str) -> TokenType {
+    match lexeme {
+        "=" => TokenType::Equal,
+        "!" => TokenType::Bang,
+        "-" => TokenType::Minus,
+        "+" => TokenType::Plus,
+        ";" => TokenType::Semicolon,
+        "," => TokenType::Comma,
+        "." => TokenType::Dot,
+        "<" => TokenType::Less,
+        ">" => TokenType::Greater,
+        "*" => TokenType::Star,
+        "/" => TokenType::Slash,
+        "{" => TokenType::LeftBrace,
+        "}" => TokenType::RightBrace,
+        "[" => TokenType::LeftBracket,
+        "]" => TokenType::RightBracket,
+        "(" => TokenType::LeftParen,
+        ")" => TokenType::RightParen,
+        _ => panic!("Unexpected symbol."),
     }
 }
 
-// TODO: Implement a function to return a value for each token type?
-// That way we can implement the Add trait on TokenType
-
-fn get_token_type(identifier: &str) -> TokenType {
+fn get_identifier_type(identifier: &str) -> TokenType {
     match identifier {
-        "and" => TokenType::AND,
-        "class" => TokenType::CLASS,
-        "else" => TokenType::ELSE,
-        "false" => TokenType::FALSE,
-        "for" => TokenType::FOR,
-        "if" => TokenType::IF,
-        "nil" => TokenType::NIL,
-        "or" => TokenType::OR,
-        "print" => TokenType::PRINT,
-        "return" => TokenType::RETURN,
-        "super" => TokenType::SUPER,
-        "this" => TokenType::THIS,
-        "true" => TokenType::TRUE,
-        "var" => TokenType::VAR,
-        "while" => TokenType::WHILE,
-        _ => TokenType::IDENTIFIER,
+        "and" => TokenType::And,
+        "class" => TokenType::Class,
+        "else" => TokenType::Else,
+        "false" => TokenType::False,
+        "for" => TokenType::For,
+        "if" => TokenType::If,
+        "nil" => TokenType::Nil,
+        "or" => TokenType::Or,
+        "print" => TokenType::Print,
+        "return" => TokenType::Return,
+        "super" => TokenType::Super,
+        "this" => TokenType::This,
+        "true" => TokenType::True,
+        "var" => TokenType::Var,
+        "while" => TokenType::While,
+        _ => TokenType::Identifier,
     }
 }
 
@@ -151,42 +242,95 @@ impl fmt::Display for TokenType {
 #[derive(Debug)]
 #[allow(non_camel_case_types)]
 enum TokenType {
-    AND,
-    BANG,
-    BANG_EQUAL,
-    CLASS,
-    COMMA,
-    DOT,
-    ELSE,
-    EQUAL,
-    EQUAL_EQUAL,
-    FALSE,
-    FOR,
-    FUN,
-    GREATER,
-    GREATER_EQUAL,
-    IDENTIFIER,
-    IF,
-    LEFT_BRACE,
-    LEFT_PAREN,
-    LESS,
-    LESS_EQUAL,
-    NIL,
-    NUMBER,
-    OR,
-    MINUS,
-    PLUS,
-    PRINT,
-    RETURN,
-    RIGHT_PAREN,
-    RIGHT_BRACE,
-    SEMICOLON,
-    SLASH,
-    STAR,
-    STRING,
-    SUPER,
-    THIS,
-    TRUE,
-    VAR,
-    WHILE,
+    And,
+    Bang,
+    BangEqual,
+    Class,
+    Comma,
+    Dot,
+    Else,
+    Equal,
+    EqualEqual,
+    False,
+    For,
+    Fun,
+    Greater,
+    GreaterEqual,
+    Identifier,
+    If,
+    LeftBracket,
+    LeftBrace,
+    LeftParen,
+    Less,
+    LessEqual,
+    Nil,
+    Number,
+    Or,
+    Minus,
+    Plus,
+    Print,
+    Return,
+    RightParen,
+    RightBracket,
+    RightBrace,
+    Semicolon,
+    Slash,
+    Star,
+    String,
+    Super,
+    This,
+    True,
+    Var,
+    While,
 }
+
+// fn main() {
+//     let a = A {
+//         name: String::from("a"),
+//         value: 1,
+//     };
+//     let b = A {
+//         name: String::from("b"),
+//         value: String::from("b"),
+//     };
+
+//     let mut v: Vec<ATypes> = Vec::new();
+
+//     v.push(ATypes::u32(a));
+//     v.push(ATypes::string(b));
+
+//     match &v[0] {
+//         ATypes::u32(item) => {
+//             println!("{:?}", item.value)
+//         }
+//         ATypes::string(item) => {
+//             println!("{:?}", item.value)
+//         }
+//     };
+// }
+
+// fn makeA() -> ATypes {
+//     ATypes::u32(A {
+//         name: String::from("a"),
+//         value: 1,
+//     })
+// }
+
+// fn makeB() -> ATypes {
+//     ATypes::string(A {
+//         name: String::from("b"),
+//         value: String::from("b"),
+//     })
+// }
+
+// #[derive(Debug)]
+// #[allow(non_camel_case_types)]
+// enum ATypes {
+//     u32(A<u32>),
+//     string(A<String>),
+// }
+// #[derive(Debug)]
+// struct A<T> {
+//     name: String,
+//     value: T,
+// }
