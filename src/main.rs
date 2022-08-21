@@ -60,31 +60,44 @@ impl Scanner {
     fn scan_tokens(&mut self) -> Vec<TokenTypes> {
         let mut tokens: Vec<TokenTypes> = Vec::new();
 
-        while self.current < self.source.len() {
+        while self.is_not_at_end() {
             let c = self.get_current_char();
 
             match c {
-                '(' => tokens.push(self.scan_symbol()),
-                ')' => tokens.push(self.scan_symbol()),
-                '{' => tokens.push(self.scan_symbol()),
-                '}' => tokens.push(self.scan_symbol()),
-                '[' => tokens.push(self.scan_symbol()),
-                ']' => tokens.push(self.scan_symbol()),
-                ',' => tokens.push(self.scan_symbol()),
-                '.' => tokens.push(self.scan_symbol()),
-                '-' => tokens.push(self.scan_symbol()),
-                '+' => tokens.push(self.scan_symbol()),
-                ';' => tokens.push(self.scan_symbol()),
-                '*' => tokens.push(self.scan_symbol()),
-                '/' => tokens.push(self.scan_symbol()),
-                '!' => tokens.push(self.scan_symbol()),
-                '=' => tokens.push(self.scan_symbol()),
-                '<' => tokens.push(self.scan_symbol()),
-                '>' => tokens.push(self.scan_symbol()),
-                '"' => {
-                    tokens.push(self.scan_string());
-                }
+                '(' => tokens.push(self.scan_symbol(1)),
+                ')' => tokens.push(self.scan_symbol(1)),
+                '{' => tokens.push(self.scan_symbol(1)),
+                '}' => tokens.push(self.scan_symbol(1)),
+                '[' => tokens.push(self.scan_symbol(1)),
+                ']' => tokens.push(self.scan_symbol(1)),
+                ',' => tokens.push(self.scan_symbol(1)),
+                '.' => tokens.push(self.scan_symbol(1)),
+                '-' => tokens.push(self.scan_symbol(1)),
+                '+' => tokens.push(self.scan_symbol(1)),
+                ';' => tokens.push(self.scan_symbol(1)),
+                '*' => tokens.push(self.scan_symbol(1)),
                 ' ' | '\r' | '\t' => self.advance(),
+                '!' => match self.peek() {
+                    '=' => tokens.push(self.scan_symbol(2)),
+                    _ => tokens.push(self.scan_symbol(1)),
+                },
+                '=' => match self.peek() {
+                    '=' => tokens.push(self.scan_symbol(2)),
+                    _ => tokens.push(self.scan_symbol(1)),
+                },
+                '<' => match self.peek() {
+                    '=' => tokens.push(self.scan_symbol(2)),
+                    _ => tokens.push(self.scan_symbol(1)),
+                },
+                '>' => match self.peek() {
+                    '=' => tokens.push(self.scan_symbol(2)),
+                    _ => tokens.push(self.scan_symbol(1)),
+                },
+                '"' => tokens.push(self.scan_string()),
+                '/' =>  match self.peek() {
+                    '/' => self.skip_comment(),
+                    _ => tokens.push(self.scan_symbol(1))
+                },
                 '\n' => {
                     self.line += 1;
                     self.advance();
@@ -101,26 +114,41 @@ impl Scanner {
             };
         }
 
+        println!("{:?}", tokens);
+
         tokens
     }
     fn get_current_char(&self) -> char {
         self.source[self.current]
     }
     fn advance(&mut self) {
+        // TODO: Put error handling here and in peek?
         self.current += 1;
     }
     fn peek(&self) -> char {
         self.source[self.current + 1]
     }
+    fn is_not_at_end(&self) -> bool {
+        self.current < self.source.len()
+    }
     fn is_alpha(&self, c: char) -> bool {
         c.is_alphabetic() || c == '_'
     }
-    fn scan_symbol(&mut self) -> TokenTypes {
-        let lexeme_char = &self.source[self.current];
-        let lexeme = lexeme_char.to_string();
-        let typ = get_symbol_type(&lexeme);
+    fn skip_comment(&mut self) {
+        while self.is_not_at_end() && self.get_current_char() != '\n' {
+            self.advance();
+        }
+    }
+    fn scan_symbol(&mut self, len: usize) -> TokenTypes {
+        let start = self.current;
 
-        self.advance();
+        for i in 0..len {
+            self.advance();
+        }
+
+        let lexeme_chars = &self.source[start..self.current];
+        let lexeme = String::from_iter(lexeme_chars);
+        let typ = get_symbol_type(&lexeme);
 
         TokenTypes::Symbol(Token::new(typ, lexeme.clone(), lexeme.clone(), self.line))
     }
@@ -135,28 +163,43 @@ impl Scanner {
         let lexeme = String::from_iter(lexeme_chars);
         let typ = get_identifier_type(&lexeme);
 
-        TokenTypes::String(Token::new(typ, lexeme.clone(), lexeme.clone(), self.line))
+        TokenTypes::Identifier(Token::new(typ, lexeme.clone(), lexeme.clone(), self.line))
     }
     fn scan_number(&mut self) -> TokenTypes {
         let start = self.current;
 
         while self.get_current_char().is_digit(10) {
+            if !self.peek().is_digit(10) && self.peek().is_alphabetic() {
+                panic!("Invalid syntax at line {}", self.line);
+            }
+
             self.advance();
+
+            if self.get_current_char() == '.' {
+                self.advance(); // add the point to the lexeme to make a float
+            }
         }
 
         let lexeme_chars = &self.source[start..self.current];
         let lexeme = String::from_iter(lexeme_chars);
-        let number = lexeme.parse::<i64>().unwrap();
+        let number = lexeme.parse::<f64>().unwrap();
 
         TokenTypes::Number(Token::new(TokenType::Number, lexeme, number, self.line))
     }
     fn scan_string(&mut self) -> TokenTypes {
         let start = self.current;
 
-        while self.get_current_char() != '"' {
+        self.advance(); // skip the first " char
+
+        while self.get_current_char() != '"' && self.is_not_at_end() {
+            if self.peek() == '\n' {
+                panic!("Multiline strings are forbidden. Fix line {}", self.line);
+            }
+
             self.advance();
         }
-        self.advance(); // get rid of the trailing "
+
+        self.advance(); // get rid of the trailing " char
 
         let lexeme_chars = &self.source[start..self.current];
         let lexeme = String::from_iter(lexeme_chars);
@@ -178,10 +221,11 @@ struct Token<T: fmt::Display + fmt::Debug> {
     line: u32,
 }
 
+#[derive(Debug)]
 enum TokenTypes {
     Symbol(Token<String>),
     Identifier(Token<String>),
-    Number(Token<i64>),
+    Number(Token<f64>),
     String(Token<String>),
 }
 
@@ -199,6 +243,10 @@ impl<T: fmt::Display + fmt::Debug> Token<T> {
 fn get_symbol_type(lexeme: &str) -> TokenType {
     match lexeme {
         "=" => TokenType::Equal,
+        "==" => TokenType::EqualEqual,
+        "!=" => TokenType::BangEqual,
+        ">=" => TokenType::GreaterEqual,
+        "<=" => TokenType::LessEqual,
         "!" => TokenType::Bang,
         "-" => TokenType::Minus,
         "+" => TokenType::Plus,
@@ -226,6 +274,7 @@ fn get_identifier_type(identifier: &str) -> TokenType {
         "else" => TokenType::Else,
         "false" => TokenType::False,
         "for" => TokenType::For,
+        "fun" => TokenType::Fun,
         "if" => TokenType::If,
         "nil" => TokenType::Nil,
         "or" => TokenType::Or,
@@ -290,54 +339,3 @@ enum TokenType {
     Var,
     While,
 }
-
-// fn main() {
-//     let a = A {
-//         name: String::from("a"),
-//         value: 1,
-//     };
-//     let b = A {
-//         name: String::from("b"),
-//         value: String::from("b"),
-//     };
-
-//     let mut v: Vec<ATypes> = Vec::new();
-
-//     v.push(ATypes::u32(a));
-//     v.push(ATypes::string(b));
-
-//     match &v[0] {
-//         ATypes::u32(item) => {
-//             println!("{:?}", item.value)
-//         }
-//         ATypes::string(item) => {
-//             println!("{:?}", item.value)
-//         }
-//     };
-// }
-
-// fn makeA() -> ATypes {
-//     ATypes::u32(A {
-//         name: String::from("a"),
-//         value: 1,
-//     })
-// }
-
-// fn makeB() -> ATypes {
-//     ATypes::string(A {
-//         name: String::from("b"),
-//         value: String::from("b"),
-//     })
-// }
-
-// #[derive(Debug)]
-// #[allow(non_camel_case_types)]
-// enum ATypes {
-//     u32(A<u32>),
-//     string(A<String>),
-// }
-// #[derive(Debug)]
-// struct A<T> {
-//     name: String,
-//     value: T,
-// }

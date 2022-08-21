@@ -1,1 +1,27 @@
-(Hello, world!)
+var num = 666.666; // this is a test comment
+var 33 text33 = "Hello world!";
+fun foo() {
+  return "bar";
+}
+print(1 <= 1);
+
+// Identifier(Token { typ: Var, lexeme: "var", literal: "var", line: 1 }),
+// Identifier(Token { typ: Identifier, lexeme: "num", literal: "num", line: 1 }),
+// Symbol(Token { typ: Equal, lexeme: "=", literal: "=", line: 1 }),
+// Number(Token { typ: Number, lexeme: "666.666", literal: 666.666, line: 1 }),
+// Symbol(Token { typ: Semicolon, lexeme: ";", literal: ";", line: 1 }),
+// Identifier(Token { typ: Var, lexeme: "var", literal: "var", line: 2 }),
+// Number(Token { typ: Number, lexeme: "33", literal: 33.0, line: 2 }),
+// Identifier(Token { typ: Identifier, lexeme: "text33", literal: "text33", line: 2 }),
+// Symbol(Token { typ: Equal, lexeme: "=", literal: "=", line: 2 }),
+// String(Token { typ: String, lexeme: "\"Hello world!\"", literal: "\"Hello world!\"", line: 2 }),
+// Symbol(Token { typ: Semicolon, lexeme: ";", literal: ";", line: 2 }),
+// Identifier(Token { typ: Fun, lexeme: "fun", literal: "fun", line: 3 }),
+// Identifier(Token { typ: Identifier, lexeme: "foo", literal: "foo", line: 3 }),
+// Symbol(Token { typ: LeftParen, lexeme: "(", literal: "(", line: 3 }),
+// Symbol(Token { typ: RightParen, lexeme: ")", literal: ")", line: 3 }),
+// Symbol(Token { typ: LeftBrace, lexeme: "{", literal: "{", line: 3 }),
+// Identifier(Token { typ: Return, lexeme: "return", literal: "return", line: 4 }),
+// String(Token { typ: String, lexeme: "\"bar\"", literal: "\"bar\"", line: 4 }),
+// Symbol(Token { typ: Semicolon, lexeme: ";", literal: ";", line: 4 }),
+// Symbol(Token { typ: RightBrace, lexeme: "}", literal: "}", line: 5 })
