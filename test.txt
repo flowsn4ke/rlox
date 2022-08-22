@@ -4,24 +4,38 @@ fun foo() {
   return "bar";
 }
 print(1 <= 1);
+var s = .344.433443;
 
-// Identifier(Token { typ: Var, lexeme: "var", literal: "var", line: 1 }),
-// Identifier(Token { typ: Identifier, lexeme: "num", literal: "num", line: 1 }),
-// Symbol(Token { typ: Equal, lexeme: "=", literal: "=", line: 1 }),
-// Number(Token { typ: Number, lexeme: "666.666", literal: 666.666, line: 1 }),
-// Symbol(Token { typ: Semicolon, lexeme: ";", literal: ";", line: 1 }),
-// Identifier(Token { typ: Var, lexeme: "var", literal: "var", line: 2 }),
-// Number(Token { typ: Number, lexeme: "33", literal: 33.0, line: 2 }),
-// Identifier(Token { typ: Identifier, lexeme: "text33", literal: "text33", line: 2 }),
-// Symbol(Token { typ: Equal, lexeme: "=", literal: "=", line: 2 }),
-// String(Token { typ: String, lexeme: "\"Hello world!\"", literal: "\"Hello world!\"", line: 2 }),
-// Symbol(Token { typ: Semicolon, lexeme: ";", literal: ";", line: 2 }),
-// Identifier(Token { typ: Fun, lexeme: "fun", literal: "fun", line: 3 }),
-// Identifier(Token { typ: Identifier, lexeme: "foo", literal: "foo", line: 3 }),
-// Symbol(Token { typ: LeftParen, lexeme: "(", literal: "(", line: 3 }),
-// Symbol(Token { typ: RightParen, lexeme: ")", literal: ")", line: 3 }),
-// Symbol(Token { typ: LeftBrace, lexeme: "{", literal: "{", line: 3 }),
-// Identifier(Token { typ: Return, lexeme: "return", literal: "return", line: 4 }),
-// String(Token { typ: String, lexeme: "\"bar\"", literal: "\"bar\"", line: 4 }),
-// Symbol(Token { typ: Semicolon, lexeme: ";", literal: ";", line: 4 }),
-// Symbol(Token { typ: RightBrace, lexeme: "}", literal: "}", line: 5 })
+// Var("var", "var", 1)
+// Identifier("num", "num", 1)
+// Equal("=", "=", 1)
+// Number("666.666", 666.666, 1)
+// Semicolon(";", ";", 1)
+// Var("var", "var", 2)
+// Number("33", 33.0, 2)
+// Identifier("text33", "text33", 2)
+// Equal("=", "=", 2)
+// String("\"Hello world!\"", "\"Hello world!\"", 2)
+// Semicolon(";", ";", 2),
+// Fun("fun", "fun", 3)
+// Identifier("foo", "foo", 3)
+// LeftParen("(", "(", 3)
+// RightParen(")", ")", 3)
+// LeftBrace("{", "{", 3)
+// Return("return", "return", 4)
+// String("\"bar\"", "\"bar\"", 4)
+// Semicolon(";", ";", 4)
+// RightBrace("}", "}", 5)
+// Print("print", "print", 6)
+// LeftParen("(", "(", 6)
+// Number("1", 1.0, 6)
+// LessEqual("<=", "<=", 6)
+// Number("1", 1.0, 6)
+// RightParen(")", ")", 6)
+// Semicolon(";", ";", 6)
+// Var("var", "var", 7)
+// Identifier("s", "s", 7)
+// Equal("=", "=", 7)
+// Dot(".", ".", 7)
+// Number("344.433443", 344.433443, 7)
+// Semicolon(";", ";", 7)
