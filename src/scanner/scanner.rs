@@ -52,7 +52,8 @@ impl Scanner {
                 },
                 '"' => tokens.push(self.scan_string()),
                 '/' => match self.peek() {
-                    '/' => self.skip_comment(),
+                    '/' => self.skip_line_comment(),
+                    '*' => self.skip_block_comment(),
                     _ => tokens.push(self.scan_symbol(1)),
                 },
                 '\n' => {
@@ -93,9 +94,40 @@ impl Scanner {
     fn is_alpha(&self, c: char) -> bool {
         c.is_alphabetic() || c == '_'
     }
-    fn skip_comment(&mut self) {
+    fn skip_line_comment(&mut self) {
         while self.is_not_at_end() && self.get_current_char() != '\n' {
             self.advance();
+        }
+    }
+    fn skip_block_comment(&mut self) {
+        let comment_start_line = self.line;
+
+        // skip the "/*" 
+        self.advance();
+        self.advance();
+
+        while self.is_not_at_end() {
+            match self.get_current_char() {
+                '\n' => {
+                    self.line += 1;
+                    self.advance();
+                },
+                '*' if self.peek() == '/' => {
+                    self.advance();
+                    self.advance();
+                    break;
+                }
+                '/' if self.peek() == '*' => {
+                    self.advance();
+                    self.advance();
+                    self.skip_block_comment(); // support for nested block comments
+                }
+                _ => self.advance(),
+            };
+
+            if self.is_at_end() {
+                panic!("Unterminated block comment started at line {}", comment_start_line);
+            }
         }
     }
     fn scan_symbol(&mut self, len: usize) -> Token {
@@ -124,18 +156,20 @@ impl Scanner {
     }
     fn scan_number(&mut self) -> Token {
         let start = self.current;
-        let mut found_decimal = false;
 
         while self.get_current_char().is_digit(10) {
-            if !self.peek().is_digit(10) && self.peek().is_alphabetic() {
+            if self.peek().is_alphabetic() {
                 panic!("Invalid syntax at line {}", self.line);
             }
 
             self.advance();
 
-            if self.get_current_char() == '.' && !found_decimal {
-                self.advance(); // add the point to the lexeme to make a float
-                found_decimal = true;
+            if self.get_current_char() == '.' {
+                self.advance();
+
+                while self.get_current_char().is_digit(10) {
+                    self.advance();
+                }
             }
         }
 

@@ -1,7 +1,8 @@
 use std::io::Write;
 use std::{env, fs, io};
+use crate::scanner::Scanner;
+
 mod scanner;
-use scanner::Scanner;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
