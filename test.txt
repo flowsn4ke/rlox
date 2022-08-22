@@ -6,11 +6,12 @@ fun foo() {
 }
 print(1 <= 1);
 var s = .344.433443;
-
+!
 /*
   This is a comment
   /*
     This is a nested comment
+  */
 */
 
 // Var("var", "var", 1)
@@ -46,3 +47,4 @@ var s = .344.433443;
 // Dot(".", ".", 7)
 // Number("344.433443", 344.433443, 7)
 // Semicolon(";", ";", 7)
+!

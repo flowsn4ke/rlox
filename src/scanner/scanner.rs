@@ -34,22 +34,14 @@ impl Scanner {
                 ';' => tokens.push(self.scan_symbol(1)),
                 '*' => tokens.push(self.scan_symbol(1)),
                 ' ' | '\r' | '\t' => self.advance(),
-                '!' => match self.peek() {
-                    '=' => tokens.push(self.scan_symbol(2)),
-                    _ => tokens.push(self.scan_symbol(1)),
-                },
-                '=' => match self.peek() {
-                    '=' => tokens.push(self.scan_symbol(2)),
-                    _ => tokens.push(self.scan_symbol(1)),
-                },
-                '<' => match self.peek() {
-                    '=' => tokens.push(self.scan_symbol(2)),
-                    _ => tokens.push(self.scan_symbol(1)),
-                },
-                '>' => match self.peek() {
-                    '=' => tokens.push(self.scan_symbol(2)),
-                    _ => tokens.push(self.scan_symbol(1)),
-                },
+                '!' if self.peek() == '='=> tokens.push(self.scan_symbol(2)),
+                '!' => tokens.push(self.scan_symbol(1)),
+                '=' if self.peek() == '=' => tokens.push(self.scan_symbol(2)),
+                '=' => tokens.push(self.scan_symbol(1)),
+                '<' if self.peek() == '=' => tokens.push(self.scan_symbol(2)),
+                '<' => tokens.push(self.scan_symbol(1)),
+                '>' if self.peek() == '=' => tokens.push(self.scan_symbol(2)),
+                '>' => tokens.push(self.scan_symbol(1)),
                 '"' => tokens.push(self.scan_string()),
                 '/' => match self.peek() {
                     '/' => self.skip_line_comment(),
@@ -83,7 +75,11 @@ impl Scanner {
         self.current += 1;
     }
     fn peek(&self) -> char {
-        self.source[self.current + 1]
+        if self.current == self.source.len() - 1 {
+            '\0' // escape sequence for the null character
+        } else {
+            self.source[self.current + 1]
+        }
     }
     fn is_at_end(&self) -> bool {
         self.current >= self.source.len()
@@ -94,46 +90,10 @@ impl Scanner {
     fn is_alpha(&self, c: char) -> bool {
         c.is_alphabetic() || c == '_'
     }
-    fn skip_line_comment(&mut self) {
-        while self.is_not_at_end() && self.get_current_char() != '\n' {
-            self.advance();
-        }
-    }
-    fn skip_block_comment(&mut self) {
-        let comment_start_line = self.line;
-
-        // skip the "/*" 
-        self.advance();
-        self.advance();
-
-        while self.is_not_at_end() {
-            match self.get_current_char() {
-                '\n' => {
-                    self.line += 1;
-                    self.advance();
-                },
-                '*' if self.peek() == '/' => {
-                    self.advance();
-                    self.advance();
-                    break;
-                }
-                '/' if self.peek() == '*' => {
-                    self.advance();
-                    self.advance();
-                    self.skip_block_comment(); // support for nested block comments
-                }
-                _ => self.advance(),
-            };
-
-            if self.is_at_end() {
-                panic!("Unterminated block comment started at line {}", comment_start_line);
-            }
-        }
-    }
     fn scan_symbol(&mut self, len: usize) -> Token {
         let start = self.current;
 
-        for i in 0..len {
+        for _ in 0..len {
             self.advance();
         }
 
@@ -197,5 +157,41 @@ impl Scanner {
         let lexeme = String::from_iter(lexeme_chars);
 
         Token::get_token_from_string(&lexeme, self.line)
+    }
+    fn skip_line_comment(&mut self) {
+        while self.is_not_at_end() && self.get_current_char() != '\n' {
+            self.advance();
+        }
+    }
+    fn skip_block_comment(&mut self) {
+        let comment_start_line = self.line;
+
+        // skip the "/*" 
+        self.advance();
+        self.advance();
+
+        while self.is_not_at_end() {
+            match self.get_current_char() {
+                '\n' => {
+                    self.line += 1;
+                    self.advance();
+                },
+                '*' if self.peek() == '/' => {
+                    self.advance();
+                    self.advance();
+                    break;
+                }
+                '/' if self.peek() == '*' => {
+                    self.advance();
+                    self.advance();
+                    self.skip_block_comment(); // support for nested block comments
+                }
+                _ => self.advance(),
+            };
+
+            if self.is_at_end() {
+                panic!("Unterminated block comment started at line {}", comment_start_line);
+            }
+        }
     }
 }
