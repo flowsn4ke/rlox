@@ -1,4 +1,4 @@
-use super::Token;
+use crate::token::Token;
 
 pub struct Scanner {
     source: Vec<char>,
@@ -34,7 +34,7 @@ impl Scanner {
                 ';' => tokens.push(self.scan_symbol(1)),
                 '*' => tokens.push(self.scan_symbol(1)),
                 ' ' | '\r' | '\t' => self.advance(),
-                '!' if self.peek() == '='=> tokens.push(self.scan_symbol(2)),
+                '!' if self.peek() == '=' => tokens.push(self.scan_symbol(2)),
                 '!' => tokens.push(self.scan_symbol(1)),
                 '=' if self.peek() == '=' => tokens.push(self.scan_symbol(2)),
                 '=' => tokens.push(self.scan_symbol(1)),
@@ -166,7 +166,7 @@ impl Scanner {
     fn skip_block_comment(&mut self) {
         let comment_start_line = self.line;
 
-        // skip the "/*" 
+        // skip the "/*"
         self.advance();
         self.advance();
 
@@ -175,7 +175,7 @@ impl Scanner {
                 '\n' => {
                     self.line += 1;
                     self.advance();
-                },
+                }
                 '*' if self.peek() == '/' => {
                     self.advance();
                     self.advance();
@@ -190,7 +190,10 @@ impl Scanner {
             };
 
             if self.is_at_end() {
-                panic!("Unterminated block comment started at line {}", comment_start_line);
+                panic!(
+                    "Unterminated block comment started at line {}",
+                    comment_start_line
+                );
             }
         }
     }

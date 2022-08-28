@@ -1,11 +1,19 @@
+use crate::scanner::Scanner;
 use std::io::Write;
 use std::{env, fs, io};
-use crate::scanner::Scanner;
 
+//* modules must be declared here so they can use each other
+mod ast;
+mod expr;
 mod scanner;
+mod token;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
+
+    let result = ast::Ast::new_test_ast();
+
+    println!("{}", result);
 
     match args.len() {
         1 => {
