@@ -13,38 +13,3 @@ var s = .344.433443;
     This is a nested comment
   */
 */
-
-// Var("var", "var", 1)
-// Identifier("num", "num", 1)
-// Equal("=", "=", 1)
-// Number("666.666", 666.666, 1)
-// Semicolon(";", ";", 1)
-// Var("var", "var", 2)
-// Number("33", 33.0, 2)
-// Identifier("text33", "text33", 2)
-// Equal("=", "=", 2)
-// String("\"Hello world!\"", "\"Hello world!\"", 2)
-// Semicolon(";", ";", 2),
-// Fun("fun", "fun", 3)
-// Identifier("foo", "foo", 3)
-// LeftParen("(", "(", 3)
-// RightParen(")", ")", 3)
-// LeftBrace("{", "{", 3)
-// Return("return", "return", 4)
-// String("\"bar\"", "\"bar\"", 4)
-// Semicolon(";", ";", 4)
-// RightBrace("}", "}", 5)
-// Print("print", "print", 6)
-// LeftParen("(", "(", 6)
-// Number("1", 1.0, 6)
-// LessEqual("<=", "<=", 6)
-// Number("1", 1.0, 6)
-// RightParen(")", ")", 6)
-// Semicolon(";", ";", 6)
-// Var("var", "var", 7)
-// Identifier("s", "s", 7)
-// Equal("=", "=", 7)
-// Dot(".", ".", 7)
-// Number("344.433443", 344.433443, 7)
-// Semicolon(";", ";", 7)
-!

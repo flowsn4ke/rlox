@@ -61,7 +61,7 @@ impl Visitor for Ast {
 }
 
 impl Ast {
-    pub fn new_test_ast() -> String {
+    pub fn new_test_ast_to_str() -> String {
         let ast = Ast {
             expression: Expr::Binary(Box::new(Binary {
                 left: Expr::Binary(Box::new(Binary {

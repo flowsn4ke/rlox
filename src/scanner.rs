@@ -19,7 +19,7 @@ impl Scanner {
 
         while self.is_not_at_end() {
             let c = self.get_current_char();
-
+            //  TODO: Add powers **, %, and bitwise operators
             match c {
                 '(' => tokens.push(self.scan_symbol(1)),
                 ')' => tokens.push(self.scan_symbol(1)),
