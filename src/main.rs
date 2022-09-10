@@ -30,8 +30,6 @@ fn run(source: String) {
     let mut scanner = Scanner::from(source.clone());
     let tokens = scanner.scan_tokens();
 
-    println!("Tokens: {:?}", tokens);
-
     let mut parser = Parser::new(tokens, source.clone());
     let expression = parser.parse();
 
