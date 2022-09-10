@@ -42,6 +42,53 @@ pub enum Token {
     While(&'static str, &'static str, usize),
 }
 
+impl Clone for Token {
+    fn clone(&self) -> Token {
+        match self {
+            Token::And(lx, lt, ln) => Token::And(*lx, *lt, *ln),
+            Token::Bang(lx, lt, ln) => Token::Bang(*lx, *lt, *ln),
+            Token::BangEqual(lx, lt, ln) => Token::BangEqual(*lx, *lt, *ln),
+            Token::Class(lx, lt, ln) => Token::Class(*lx, *lt, *ln),
+            Token::Comma(lx, lt, ln) => Token::Comma(*lx, *lt, *ln),
+            Token::Dot(lx, lt, ln) => Token::Dot(*lx, *lt, *ln),
+            Token::Else(lx, lt, ln) => Token::Else(*lx, *lt, *ln),
+            Token::Equal(lx, lt, ln) => Token::Equal(*lx, *lt, *ln),
+            Token::EqualEqual(lx, lt, ln) => Token::EqualEqual(*lx, *lt, *ln),
+            Token::False(lx, lt, ln) => Token::False(*lx, *lt, *ln),
+            Token::For(lx, lt, ln) => Token::For(*lx, *lt, *ln),
+            Token::Fun(lx, lt, ln) => Token::Fun(*lx, *lt, *ln),
+            Token::Greater(lx, lt, ln) => Token::Greater(*lx, *lt, *ln),
+            Token::GreaterEqual(lx, lt, ln) => Token::GreaterEqual(*lx, *lt, *ln),
+            Token::Identifier(lx, lt, ln) => Token::Identifier(lx.clone(), lt.clone(), *ln),
+            Token::If(lx, lt, ln) => Token::If(*lx, *lt, *ln),
+            Token::LeftBracket(lx, lt, ln) => Token::LeftBracket(*lx, *lt, *ln),
+            Token::LeftBrace(lx, lt, ln) => Token::LeftBrace(*lx, *lt, *ln),
+            Token::LeftParen(lx, lt, ln) => Token::LeftParen(*lx, *lt, *ln),
+            Token::Less(lx, lt, ln) => Token::Less(*lx, *lt, *ln),
+            Token::LessEqual(lx, lt, ln) => Token::LessEqual(*lx, *lt, *ln),
+            Token::Nil(lx, lt, ln) => Token::Nil(*lx, *lt, *ln),
+            Token::Number(lx, lt, ln) => Token::Number(lx.clone(), *lt, *ln),
+            Token::Or(lx, lt, ln) => Token::Or(*lx, *lt, *ln),
+            Token::Minus(lx, lt, ln) => Token::Minus(*lx, *lt, *ln),
+            Token::Plus(lx, lt, ln) => Token::Plus(*lx, *lt, *ln),
+            Token::Print(lx, lt, ln) => Token::Print(*lx, *lt, *ln),
+            Token::Return(lx, lt, ln) => Token::Return(*lx, *lt, *ln),
+            Token::RightParen(lx, lt, ln) => Token::RightParen(*lx, *lt, *ln),
+            Token::RightBracket(lx, lt, ln) => Token::RightBracket(*lx, *lt, *ln),
+            Token::RightBrace(lx, lt, ln) => Token::RightBrace(*lx, *lt, *ln),
+            Token::Semicolon(lx, lt, ln) => Token::Semicolon(*lx, *lt, *ln),
+            Token::Slash(lx, lt, ln) => Token::Slash(*lx, *lt, *ln),
+            Token::Star(lx, lt, ln) => Token::Star(*lx, *lt, *ln),
+            Token::String(lx, lt, ln) => Token::String(lx.clone(), lt.clone(), *ln),
+            Token::Super(lx, lt, ln) => Token::Super(*lx, *lt, *ln),
+            Token::This(lx, lt, ln) => Token::This(*lx, *lt, *ln),
+            Token::True(lx, lt, ln) => Token::True(*lx, *lt, *ln),
+            Token::Var(lx, lt, ln) => Token::Var(*lx, *lt, *ln),
+            Token::While(lx, lt, ln) => Token::While(*lx, *lt, *ln),
+        }
+    }
+}
+
 /*
 You should always be using to_owned(). to_string() is the generic conversion
 to a String from any type implementing the ToString trait. It uses the formatting
@@ -103,5 +150,49 @@ impl Token {
     }
     pub fn get_token_from_string(lexeme: &str, line: usize) -> Token {
         Token::String(lexeme.to_owned(), lexeme.to_owned(), line)
+    }
+    pub fn get_info(&self) -> (String, String, usize) {
+        match self {
+            Token::And(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Bang(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::BangEqual(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Class(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Comma(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Dot(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Else(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Equal(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::EqualEqual(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::False(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::For(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Fun(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Greater(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::GreaterEqual(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Identifier(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::If(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::LeftBracket(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::LeftBrace(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::LeftParen(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Less(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::LessEqual(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Nil(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Number(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Or(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Minus(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Plus(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Print(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Return(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::RightParen(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::RightBracket(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::RightBrace(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Semicolon(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Slash(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Star(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::String(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Super(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::This(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::True(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::Var(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+            Token::While(lx, lt, ln) => (lx.to_string(), lt.to_string(), *ln),
+        }
     }
 }

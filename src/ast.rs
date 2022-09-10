@@ -45,7 +45,15 @@ impl Visitor for Ast {
     fn visit_literal_expr(&self, expr: &Literal) -> String {
         let mut result = String::new();
         let literal_expr = &*expr;
-        result.push_str(&literal_expr.value.to_string());
+
+        let value = match literal_expr {
+            Literal::Number(number) => number.to_string(),
+            Literal::String(string) => string.clone(),
+            Literal::Boolean(boolean) => boolean.to_string(),
+            Literal::Nil => "nil".to_string(),
+        };
+
+        result.push_str(&value);
         result
     }
 
@@ -61,23 +69,29 @@ impl Visitor for Ast {
 }
 
 impl Ast {
-    pub fn new_test_ast_to_str() -> String {
-        let ast = Ast {
-            expression: Expr::Binary(Box::new(Binary {
-                left: Expr::Binary(Box::new(Binary {
-                    left: Expr::Literal(Box::new(Literal { value: 1.0 })),
-                    operator: Token::Plus("+", "+", 1),
-                    right: Expr::Literal(Box::new(Literal { value: 2.0 })),
-                })),
-                right: Expr::Binary(Box::new(Binary {
-                    left: Expr::Literal(Box::new(Literal { value: 1.0 })),
-                    operator: Token::Plus("+", "+", 1),
-                    right: Expr::Literal(Box::new(Literal { value: 2.0 })),
-                })),
-                operator: Token::Minus("-", "-", 1),
+    pub fn new(expression: Expr) -> Self {
+        Self { expression }
+    }
+    pub fn print(&self) {
+        let result = self.visit_expr(&self.expression);
+        println!("{}", result);
+    }
+    pub fn new_test_ast_to_str(&self) {
+        let expression = Expr::Binary(Box::new(Binary {
+            left: Expr::Binary(Box::new(Binary {
+                left: Expr::Literal(Literal::Number(1.0)),
+                operator: Token::Plus("+", "+", 1),
+                right: Expr::Literal(Literal::Number(2.0)),
             })),
-        };
-        ast.visit_expr(&ast.expression)
+            right: Expr::Binary(Box::new(Binary {
+                left: Expr::Literal(Literal::Number(1.0)),
+                operator: Token::Plus("+", "+", 1),
+                right: Expr::Literal(Literal::Number(2.0)),
+            })),
+            operator: Token::Minus("-", "-", 1),
+        }));
+        let ast = Ast::new(expression);
+        ast.print();
     }
 }
 

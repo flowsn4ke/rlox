@@ -1,9 +1,15 @@
 use crate::token::Token;
 
+pub struct ScanError {
+    pub message: String,
+    pub line: usize,
+}
+
 pub struct Scanner {
     source: Vec<char>,
     current: usize,
     line: usize,
+    errors: Vec<ScanError>, // TODO: actually collect errors
 }
 
 impl Scanner {
@@ -12,6 +18,7 @@ impl Scanner {
             source: source.chars().collect(),
             current: 0,
             line: 1,
+            errors: Vec::new(),
         }
     }
     pub fn scan_tokens(&mut self) -> Vec<Token> {
@@ -19,6 +26,7 @@ impl Scanner {
 
         while self.is_not_at_end() {
             let c = self.get_current_char();
+
             //  TODO: Add powers **, %, and bitwise operators
             match c {
                 '(' => tokens.push(self.scan_symbol(1)),
@@ -71,18 +79,19 @@ impl Scanner {
         self.source[self.current]
     }
     fn advance(&mut self) {
-        // TODO: Put error handling here and in peek?
-        self.current += 1;
+        if self.is_not_at_end() {
+            self.current += 1;
+        }
     }
     fn peek(&self) -> char {
-        if self.current == self.source.len() - 1 {
+        if self.is_at_end() {
             '\0' // escape sequence for the null character
         } else {
             self.source[self.current + 1]
         }
     }
     fn is_at_end(&self) -> bool {
-        self.current >= self.source.len()
+        self.current >= (self.source.len() - 1)
     }
     fn is_not_at_end(&self) -> bool {
         self.current < self.source.len()
@@ -105,7 +114,7 @@ impl Scanner {
     fn scan_identifier(&mut self) -> Token {
         let start = self.current;
 
-        while self.get_current_char().is_alphanumeric() {
+        while self.is_not_at_end() && self.get_current_char().is_alphanumeric() {
             self.advance();
         }
 
@@ -117,14 +126,14 @@ impl Scanner {
     fn scan_number(&mut self) -> Token {
         let start = self.current;
 
-        while self.get_current_char().is_digit(10) {
+        while self.is_not_at_end() && self.get_current_char().is_digit(10) {
             if self.peek().is_alphabetic() {
                 panic!("Invalid syntax at line {}", self.line);
             }
 
             self.advance();
 
-            if self.get_current_char() == '.' {
+            if self.is_not_at_end() && self.get_current_char() == '.' {
                 self.advance();
 
                 while self.get_current_char().is_digit(10) {
@@ -143,7 +152,7 @@ impl Scanner {
 
         self.advance(); // skip the first " char
 
-        while self.get_current_char() != '"' && self.is_not_at_end() {
+        while self.is_not_at_end() && self.get_current_char() != '"' && self.is_not_at_end() {
             if self.peek() == '\n' {
                 panic!("Multiline strings are forbidden. Fix line {}", self.line);
             }

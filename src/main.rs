@@ -1,3 +1,5 @@
+use crate::ast::Ast;
+use crate::parser::Parser;
 use crate::scanner::Scanner;
 use std::io::Write;
 use std::{env, fs, io};
@@ -12,10 +14,6 @@ mod token;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let result = ast::Ast::new_test_ast_to_str();
-
-    println!("{}", result);
-
     match args.len() {
         1 => {
             run_prompt();
@@ -29,9 +27,16 @@ fn main() {
 }
 
 fn run(source: String) {
-    let mut scanner = Scanner::from(source);
+    let mut scanner = Scanner::from(source.clone());
     let tokens = scanner.scan_tokens();
-    println!("{:?}", tokens);
+
+    println!("Tokens: {:?}", tokens);
+
+    let mut parser = Parser::new(tokens, source.clone());
+    let expression = parser.parse();
+
+    let ast = Ast::new(expression);
+    ast.print();
 }
 
 fn run_file(path: &str) {

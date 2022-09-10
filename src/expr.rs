@@ -17,7 +17,7 @@ pub trait Visitor {
 #[derive(Debug)]
 pub enum Expr {
     Binary(Box<Binary>),
-    Literal(Box<Literal>),
+    Literal(Literal),
     Unary(Box<Unary>),
     Grouping(Box<Grouping>),
 }
@@ -53,8 +53,11 @@ impl Acceptor for Binary {
 }
 
 #[derive(Debug)]
-pub struct Literal {
-    pub value: f64,
+pub enum Literal {
+    Number(f64),
+    String(String),
+    Boolean(bool),
+    Nil,
 }
 
 impl Acceptor for Literal {
